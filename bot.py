@@ -1,5 +1,6 @@
 from pyrogram import Client, filters
-import os
+from pyrogram.errors import FloodWait
+import os, asyncio, logging
 
 API_ID = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
@@ -13,11 +14,29 @@ app = Client(
     session_string=SESSION_STRING
 )
 
-@app.on_chat_join_request(filters.chat(AUTH_GROUP))
-async def accept_all_members(bot, update):
+@app.on_message(filters.command(["run", "approve"], [".", "/"]))                     
+async def approve(client, message):
+    Id = message.chat.id
+    await message.delete(True)
+ 
     try:
-        await bot.approve_all_chat_join_requests(chat_id=AUTH_GROUP)
-    except Exception as e:
-        print(e)    
+       while True:
+           try:
+               await client.approve_all_chat_join_requests(Id)         
+           except FloodWait as t:
+               asyncio.sleep(t.value)
+               await client.approve_all_chat_join_requests(Id) 
+           except Exception as e:
+               logging.error(str(e))
+    except FloodWait as s:
+        asyncio.sleep(s.value)
+        while True:
+           try:
+               await client.approve_all_chat_join_requests(Id)         
+           except FloodWait as t:
+               asyncio.sleep(t.value)
+               await client.approve_all_chat_join_requests(Id) 
+           except Exception as e:
+               logging.error(str(e))
 
 app.run()
