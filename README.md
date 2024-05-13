@@ -1,1 +1,1 @@
-A Telegram User That Can Accept All Join Request Instantly.
+A Telegram UserBot That Can Accept All Join Request & Delete All Group Message Instantly
